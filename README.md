@@ -1,4 +1,5 @@
 # Projeto 2 — Pronto Socorro SUS - V2
+
 **Disciplina:** SCC0202 - Algoritmos e Estruturas de Dados I  
 **Professores:** Rudinei e JB  
 **Monitores:** Laura e Felipe  
@@ -51,7 +52,7 @@ Para garantir eficiência e evitar operações lineares, o sistema utiliza **TAD
 6. Dar alta ao paciente  
 7. Sair  
 
-### Resumo das operações:
+### Resumo das operações
 
 - **Registrar paciente:** Cadastra um novo paciente (IDs repetidos não são permitidos) e o insere imediatamente na fila, respeitando a prioridade.  
 - **Remover paciente:** Só é possível se o paciente **não estiver** na fila de espera.  
