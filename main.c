@@ -11,9 +11,9 @@ int display_menu() {
     printf("Menu:\n");
     printf("1. Registrar Paciente\n");
     printf("2. Remover paciente\n");
-    printf("3. Lista de pacientes\n");
-    printf("4. Buscar pacientes por id\n");
-    printf("5. Mostrar fila de emergencia\n");
+    printf("3. Listar pacientes\n");
+    printf("4. Buscar paciente por id\n");
+    printf("5. Mostrar fila de espera\n");
     printf("6. Dar alta ao paciente\n");
     printf("7. Sair\n");
     printf("Escolha uma opção: ");
