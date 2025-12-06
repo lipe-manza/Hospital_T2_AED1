@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "paciente.h"
+#include "../headers/paciente.h"
 
 
 // Struct paciente que armazena o id nome e um historico de cada paciente

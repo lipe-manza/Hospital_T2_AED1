@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include "avl.h"
-#include "heap.h"
-#include "op.h"
+#include "headers/avl.h"
+#include "headers/fila.h"
+#include "headers/op.h"
 
 // Função para carregar o display de escolhas no terminal, pega a escolha e retorna ela 
 int display_menu() {
@@ -30,7 +30,7 @@ int display_menu() {
 int main() {
     int choice;
 
-    HS* fila_de_espera = fila_criar(); // Cria a fila da triagem
+    FILA* fila_de_espera = fila_criar(); // Cria a fila da triagem
     AVL* lista_de_pacientes = lista_criar(); // Cria a lista de pacientes
 
     // Carregar dados salvos

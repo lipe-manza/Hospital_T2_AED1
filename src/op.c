@@ -1,9 +1,8 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include "op.h"
+#include "../headers/op.h"
 
-void call_options(AVL* lista_de_pacientes, HS* fila_de_espera, int choice) {
+void call_options(AVL* lista_de_pacientes, FILA* fila_de_espera, int choice) {
     switch (choice)
     {
     case 1: // Registrar Paciente

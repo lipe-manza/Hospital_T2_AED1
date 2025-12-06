@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "avl.h"
+#include "../headers/avl.h"
 #define max(a,b) ((a>b)? a: b)
 
 // Estrutura do nó (usa o TAD PACIENTE)
