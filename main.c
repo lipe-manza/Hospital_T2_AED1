@@ -45,9 +45,9 @@ int main() {
     // Inicio do menu e dos switchs
     do {
         choice = display_menu();
-        opcoes(lista_de_pacientes, fila_de_espera, choice);
+        call_options(lista_de_pacientes, fila_de_espera, choice);
 
-    } while (choice != 5);
+    } while (choice != 7);
 
     // Salvar dados antes de sair
     printf("\nSalvando dados...\n");

@@ -1,10 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "op.h"
-#include "heap.h"
-#include "avl.h"
 
-void opcoes(AVL* lista_de_pacientes, HS* fila_de_espera, int choice) {
+void call_options(AVL* lista_de_pacientes, HS* fila_de_espera, int choice) {
     switch (choice)
     {
     case 1: // Registrar Paciente
@@ -111,10 +110,9 @@ void opcoes(AVL* lista_de_pacientes, HS* fila_de_espera, int choice) {
     }
     case 3: // Listar pacientes
     {
-        printf("===========================================\n");
-        printf("Lista de Pacientes Registrados:\n");
+        printf("Lista de Pacientes Registrados:\n\n");
         lista_imprimir(lista_de_pacientes);
-        printf("===========================================\n");
+      
         break;
     }
     case 4: { // Buscar paciente por ID

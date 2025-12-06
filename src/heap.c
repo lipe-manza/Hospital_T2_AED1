@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "stdio.h"
 #include "heap.h"
 
@@ -79,7 +80,7 @@ static void fix_up(HS* heap) {
     }
 }
 
-bool heap_inserir_paciente(HS* heap, PACIENTE* paciente) {
+bool fila_inserir_paciente(HS* heap, PACIENTE* paciente) {
     if (heap == NULL || paciente == NULL) return false;
     if (fila_cheia(heap)) return false;
 

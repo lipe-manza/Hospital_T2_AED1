@@ -37,7 +37,7 @@ static NO* avl_criar_no(PACIENTE* paciente) {
     return new_node;
 }
 
-static bool lista_cheia(AVL* T) {
+static bool lista_cheia() {
     NO* teste = malloc(sizeof(NO));
     if (teste == NULL)
         return true;
@@ -63,6 +63,23 @@ void lista_apagar(AVL** T) {
         free(*T);
         *T = NULL;
     }
+}
+
+// Busca recursiva (privada)
+static PACIENTE* avl_busca_aux(NO* root, int id) {
+    if (root == NULL) return NULL;
+    if (id == paciente_get_id(root->paciente))
+        return root->paciente;
+    if (id < paciente_get_id(root->paciente))
+        return avl_busca_aux(root->left, id);
+    else
+        return avl_busca_aux(root->right, id);
+}
+
+// API pública de busca (usa nó raiz)
+PACIENTE* lista_buscar_paciente(AVL* T, int id) {
+    if (T == NULL) return NULL;
+    return avl_busca_aux(T->root, id);
 }
 
 // Retorna altura do nó (-1 se NULL)
@@ -143,11 +160,11 @@ bool lista_inserir_paciente(AVL* T, PACIENTE* paciente) {
     if (T == NULL || paciente == NULL) return false;
 
     // evita duplicata: se já existir paciente com mesmo id, não inserimos
-    if (lista_buscar_paciente(T->root, paciente_get_id(paciente)) != NULL) {
+    if (lista_buscar_paciente(T, paciente_get_id(paciente)) != NULL) {
         return false;
     }
 
-    if( lista_cheia(T)) {
+    if (lista_cheia()) {
         printf("Erro: memória insuficiente para inserir novo paciente na árvore.\n");
         return false;
     }
@@ -162,22 +179,6 @@ bool lista_inserir_paciente(AVL* T, PACIENTE* paciente) {
     return false;
 }
 
-// Busca recursiva (privada)
-static PACIENTE* avl_busca_aux(NO* root, int id) {
-    if (root == NULL) return NULL;
-    if (id == paciente_get_id(root->paciente))
-        return root->paciente;
-    if (id < paciente_get_id(root->paciente))
-        return avl_busca_aux(root->left, id);
-    else
-        return avl_busca_aux(root->right, id);
-}
-
-// API pública de busca (usa nó raiz)
-PACIENTE* lista_buscar_paciente(AVL* T, int id) {
-    if (T == NULL) return NULL;
-    return avl_busca_aux(T->root, id);
-}
 
 // Helper para remover: procura maior na subárvore esquerda e o coloca no nó r
 static void swap_left_max(NO* t, NO* r, NO* a) {
