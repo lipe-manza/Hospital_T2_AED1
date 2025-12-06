@@ -155,11 +155,6 @@ void fila_apagar(FILA** fila_ptr) {
         while (atual != NULL) {
             struct no_fila* proximo = atual->proximo;
             
-            if (atual->paciente != NULL) {
-                PACIENTE* p = atual->paciente;
-                paciente_apagar(&p);
-            }
-            
             free(atual);
             atual = proximo;
         }
@@ -203,6 +198,38 @@ void fila_imprimir(FILA* fila) {
             atual = atual->proximo;
         }
     }
+}
+
+// Obtém IDs da fila para uma prioridade específica
+int* fila_obter_ids_por_prioridade(FILA* fila, int prioridade, int* tamanho) {
+    if (fila == NULL || tamanho == NULL || prioridade < 0 || prioridade > 4) {
+        if (tamanho != NULL) *tamanho = 0;
+        return NULL;
+    }
+    
+    int count = fila->filas[prioridade].tamanho;
+    if (count == 0) {
+        *tamanho = 0;
+        return NULL;
+    }
+    
+    int* ids = (int*)malloc(count * sizeof(int));
+    if (ids == NULL) {
+        *tamanho = 0;
+        return NULL;
+    }
+    
+    int index = 0;
+    struct no_fila* atual = fila->filas[prioridade].inicio;
+    while (atual != NULL) {
+        if (atual->paciente != NULL) {
+            ids[index++] = paciente_get_id(atual->paciente);
+        }
+        atual = atual->proximo;
+    }
+    
+    *tamanho = index;
+    return ids;
 }
 
 

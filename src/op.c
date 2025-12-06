@@ -69,6 +69,7 @@ void call_options(AVL* lista_de_pacientes, FILA* fila_de_espera, int choice) {
         if (!fila_inserir_paciente(fila_de_espera, novo_paciente)) {
             printf("ERRO: Não foi possível adicionar o paciente à fila de espera.\n");
             lista_remover_paciente(lista_de_pacientes, id); // remove da lista se não conseguir inserir na fila
+            novo_paciente = NULL;
             break;
         }
 

@@ -11,3 +11,7 @@ data/*.json
 *.swp
 *.swo
 *.tmp
+
+# Arquivos de persistência de dados
+fila_espera.json
+pacientes.json

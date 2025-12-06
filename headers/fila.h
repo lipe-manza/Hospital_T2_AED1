@@ -15,5 +15,9 @@ PACIENTE* fila_remover_paciente(FILA* fila);
 bool fila_contem_paciente(FILA* fila, int id);
 void fila_apagar(FILA** fila);
 void fila_imprimir(FILA* fila);
+
+// Função auxiliar para obter IDs da fila por prioridade (para uso em IO)
+// Retorna array de IDs para uma prioridade específica
+int* fila_obter_ids_por_prioridade(FILA* fila, int prioridade, int* tamanho);
 #endif
 

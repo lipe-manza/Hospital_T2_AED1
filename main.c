@@ -2,6 +2,7 @@
 #include "headers/avl.h"
 #include "headers/fila.h"
 #include "headers/op.h"
+#include "headers/IO.h"
 
 // Função para carregar o display de escolhas no terminal, pega a escolha e retorna ela 
 int display_menu() {
@@ -38,8 +39,11 @@ int main() {
     printf("   Sistema de Gestão Hospitalar - PS\n");
     printf("===========================================\n\n");
     printf("Carregando dados salvos...\n");
-    //falta implementar a funcao de carregar json
-    printf("\n");
+    if (io_carregar(&lista_de_pacientes, &fila_de_espera)) {
+        printf("Dados carregados com sucesso!\n\n");
+    } else {
+        printf("Nenhum dado salvo encontrado ou erro ao carregar.\n\n");
+    }
 
 
     // Inicio do menu e dos switchs
@@ -51,8 +55,11 @@ int main() {
 
     // Salvar dados antes de sair
     printf("\nSalvando dados...\n");
-    // falta implementar a funcao de salvar json
-    printf("\nDados salvos com sucesso!\n\n");
+    if (io_salvar(lista_de_pacientes, fila_de_espera)) {
+        printf("Dados salvos com sucesso!\n\n");
+    } else {
+        printf("ERRO: Não foi possível salvar os dados.\n\n");
+    }
 
     // Limpar memória antes de sair
     fila_apagar(&fila_de_espera);

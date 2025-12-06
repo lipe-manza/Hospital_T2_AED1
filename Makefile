@@ -1,13 +1,15 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -g -Iheaders
+CFLAGS = -Wall -Wextra -std=c11 -g -fsanitize=address -fno-omit-frame-pointer -Iheaders
+LDFLAGS = -fsanitize=address
 
 SRC_MAIN = main.c
 SRC_PACIENTE = src/paciente.c
 SRC_AVL = src/avl.c
 SRC_FILA = src/fila.c
 SRC_OP = src/op.c
+SRC_IO = src/IO.c
 
-OBJS = build/main.o build/paciente.o build/avl.o build/fila.o build/op.o
+OBJS = build/main.o build/paciente.o build/avl.o build/fila.o build/op.o build/IO.o
 
 TARGET = programa
 
@@ -32,6 +34,9 @@ build/fila.o: $(SRC_FILA) headers/fila.h headers/paciente.h
 
 build/op.o: $(SRC_OP) headers/op.h headers/paciente.h headers/avl.h headers/fila.h
 	$(CC) $(CFLAGS) -c $(SRC_OP) -o $@
+
+build/IO.o: $(SRC_IO) headers/IO.h headers/paciente.h headers/avl.h headers/fila.h
+	$(CC) $(CFLAGS) -c $(SRC_IO) -o $@
 
 # Criar pasta build
 build:

@@ -25,4 +25,8 @@ void lista_apagar(AVL** T);
 // Imprime a árvore em ordem (in-order traversal)
 void lista_imprimir(AVL* T);
 
+// Função auxiliar para obter todos os pacientes da AVL (para uso em IO)
+// Retorna array de ponteiros para pacientes e o tamanho
+PACIENTE** lista_obter_todos_pacientes(AVL* T, int* tamanho);
+
 #endif

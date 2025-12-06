@@ -285,3 +285,45 @@ void lista_imprimir(AVL* T) {
     lista_imprimir_aux(T->root);
 }
 
+// Função auxiliar para contar nós na AVL
+static int contar_nos_aux(NO* root) {
+    if (root == NULL) return 0;
+    return 1 + contar_nos_aux(root->left) + contar_nos_aux(root->right);
+}
+
+// Função auxiliar para coletar pacientes em array (in-order)
+static int coletar_pacientes_aux(NO* root, PACIENTE** array, int index) {
+    if (root == NULL) return index;
+    
+    index = coletar_pacientes_aux(root->left, array, index);
+    if (root->paciente != NULL) {
+        array[index++] = root->paciente;
+    }
+    index = coletar_pacientes_aux(root->right, array, index);
+    return index;
+}
+
+// obtém todos os pacientes da AVL em um array
+PACIENTE** lista_obter_todos_pacientes(AVL* T, int* tamanho) {
+    if (T == NULL || tamanho == NULL) {
+        if (tamanho != NULL) *tamanho = 0;
+        return NULL;
+    }
+    
+    int count = contar_nos_aux(T->root);
+    if (count == 0) {
+        *tamanho = 0;
+        return NULL;
+    }
+    
+    PACIENTE** array = (PACIENTE**)malloc(count * sizeof(PACIENTE*));
+    if (array == NULL) {
+        *tamanho = 0;
+        return NULL;
+    }
+    
+    coletar_pacientes_aux(T->root, array, 0);
+    *tamanho = count;
+    return array;
+}
+
