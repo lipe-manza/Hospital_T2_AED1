@@ -1,0 +1,13 @@
+# Pasta de compilação e arquivos objetos
+build/
+
+# Executável
+programa
+
+# Arquivos de dados gerados
+data/*.json
+
+# Arquivos temporários de editor (opcional)
+*.swp
+*.swo
+*.tmp
