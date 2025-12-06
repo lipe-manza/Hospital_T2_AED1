@@ -4,7 +4,7 @@ build/
 # Executável
 programa
 
-# Arquivos de dados gerados
+# Ignorar apenas arquivos .json dentro da pasta data
 data/*.json
 
 # Arquivos temporários de editor (opcional)
