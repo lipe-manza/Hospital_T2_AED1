@@ -31,9 +31,8 @@ int display_menu() {
 int main() {
     int choice;
 
-    FILA* fila_de_espera = fila_criar(); // Cria a fila da triagem
-    AVL* lista_de_pacientes = lista_criar(); // Cria a lista de pacientes
-
+    FILA* fila_de_espera = fila_criar();
+    AVL* lista_de_pacientes= lista_criar();
     // Carregar dados salvos
     printf("===========================================\n");
     printf("   Sistema de Gestão Hospitalar - PS\n");
@@ -41,7 +40,8 @@ int main() {
     printf("Carregando dados salvos...\n");
     if (io_carregar(&lista_de_pacientes, &fila_de_espera)) {
         printf("Dados carregados com sucesso!\n\n");
-    } else {
+    }
+    else {
         printf("Nenhum dado salvo encontrado ou erro ao carregar.\n\n");
     }
 
@@ -57,7 +57,8 @@ int main() {
     printf("\nSalvando dados...\n");
     if (io_salvar(lista_de_pacientes, fila_de_espera)) {
         printf("Dados salvos com sucesso!\n\n");
-    } else {
+    }
+    else {
         printf("ERRO: Não foi possível salvar os dados.\n\n");
     }
 

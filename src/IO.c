@@ -1,359 +1,134 @@
-#include "../headers/IO.h"
-#include "../headers/avl.h"
-#include "../headers/fila.h"
-#include "../headers/paciente.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../headers/IO.h"
+#include "../headers/paciente.h"
+#include "../headers/avl.h"
+#include "../headers/fila.h"
 
-// Função auxiliar para escapar string JSON (adiciona escape para caracteres especiais)
-static void json_escape_string(const char* str, FILE* fp) {
-    if (str == NULL) {
-        fputs("\"\"", fp);
-        return;
-    }
-    
-    fputc('"', fp);
-    for (const char* p = str; *p != '\0'; p++) {
-        switch (*p) {
-            case '"':  fputs("\\\"", fp); break;
-            case '\\': fputs("\\\\", fp); break;
-            case '\n': fputs("\\n", fp); break;
-            case '\r': fputs("\\r", fp); break;
-            case '\t': fputs("\\t", fp); break;
-            default:
-                if (*p >= 0 && *p < 32) {
-                    // Caracteres de controle - escapa como unicode
-                    fprintf(fp, "\\u%04x", (unsigned char)*p);
-                } else {
-                    fputc(*p, fp);
-                }
-                break;
-        }
-    }
-    fputc('"', fp);
-}
+// Estrutura fixa para salvar pacientes sem ponteiros
+typedef struct {
+    int id;
+    char nome[100];
+    int prioridade;
+} PACIENTE_BIN;
 
+
+// ============================================================================
+// SALVAR
+// ============================================================================
 bool io_salvar(AVL* lista_pacientes, FILA* fila_espera) {
-    if (lista_pacientes == NULL || fila_espera == NULL) {
+    if (!lista_pacientes || !fila_espera)
+        return false;
+
+    FILE* arq_pac = fopen("data/pacientes.bin", "wb");
+    FILE* arq_fila = fopen("data/fila.bin", "wb");
+
+    if (!arq_pac || !arq_fila) {
+        if (arq_pac) fclose(arq_pac);
+        if (arq_fila) fclose(arq_fila);
         return false;
     }
-    
-    // Salvar pacientes da AVL em JSON
-    FILE* fp_pacientes = fopen("pacientes.json", "w");
-    if (fp_pacientes == NULL) {
-        return false;
+
+    // ----- SALVAR AVL -----
+    int total = 0;
+    PACIENTE** vetor = lista_obter_todos_pacientes(lista_pacientes, &total);
+
+    fwrite(&total, sizeof(int), 1, arq_pac);
+
+    for (int i = 0; i < total; i++) {
+        PACIENTE* p = vetor[i];
+        PACIENTE_BIN pb;
+
+        pb.id = paciente_get_id(p);
+        pb.prioridade = paciente_get_prioridade(p);
+
+        strncpy(pb.nome, paciente_get_name(p), 99);
+        pb.nome[99] = '\0';
+
+        fwrite(&pb, sizeof(PACIENTE_BIN), 1, arq_pac);
     }
-    
-    // Obtém todos os pacientes da AVL
-    int tamanho_pacientes;
-    PACIENTE** pacientes = lista_obter_todos_pacientes(lista_pacientes, &tamanho_pacientes);
-    
-    fprintf(fp_pacientes, "{\n  \"pacientes\": [\n");
-    
-    if (pacientes != NULL && tamanho_pacientes > 0) {
-        // Salva cada paciente
-        for (int i = 0; i < tamanho_pacientes; i++) {
-            if (pacientes[i] != NULL) {
-                int id = paciente_get_id(pacientes[i]);
-                const char* nome = paciente_get_name(pacientes[i]);
-                int prioridade = paciente_get_prioridade(pacientes[i]);
-                
-                fprintf(fp_pacientes, "    {\n");
-                fprintf(fp_pacientes, "      \"id\": %d,\n", id);
-                fprintf(fp_pacientes, "      \"nome\": ");
-                json_escape_string(nome, fp_pacientes);
-                fprintf(fp_pacientes, ",\n");
-                fprintf(fp_pacientes, "      \"prioridade\": %d\n", prioridade);
-                
-                if (i < tamanho_pacientes - 1) {
-                    fprintf(fp_pacientes, "    },\n");
-                } else {
-                    fprintf(fp_pacientes, "    }\n");
-                }
-            }
-        }
+
+    free(vetor);
+    fclose(arq_pac);
+
+    // ----- SALVAR FILAS (apenas IDs) -----
+    for (int pr = 0; pr < 5; pr++) {
+        int tam = 0;
+        int* ids = fila_obter_ids_por_prioridade(fila_espera, pr, &tam);
+
+        fwrite(&tam, sizeof(int), 1, arq_fila);
+
+        for (int i = 0; i < tam; i++)
+            fwrite(&ids[i], sizeof(int), 1, arq_fila);
+
+        free(ids);  // free(NULL) é seguro
     }
-    
-    fprintf(fp_pacientes, "  ]\n}");
-    fclose(fp_pacientes);
-    
-    if (pacientes != NULL) {
-        free(pacientes); // Libera o array, mas não os pacientes
-    }
-    
-    // Salvar fila de espera em JSON (organizada por prioridade)
-    FILE* fp_fila = fopen("fila_espera.json", "w");
-    if (fp_fila == NULL) {
-        return false;
-    }
-    
-    fprintf(fp_fila, "{\n");
-    
-    const char* nomes_prioridade[] = {
-        "nao_urgente",
-        "pouco_urgente",
-        "urgente",
-        "muito_urgente",
-        "emergencia"
-    };
-    
-    bool primeiro_campo = true;
-    
-    // Salva cada prioridade como um array
-    for (int prioridade = 0; prioridade < 5; prioridade++) {
-        int tamanho_ids;
-        int* ids = fila_obter_ids_por_prioridade(fila_espera, prioridade, &tamanho_ids);
-        
-        if (!primeiro_campo) {
-            fprintf(fp_fila, ",\n");
-        }
-        primeiro_campo = false;
-        
-        fprintf(fp_fila, "  \"%s\": [", nomes_prioridade[prioridade]);
-        
-        if (ids != NULL && tamanho_ids > 0) {
-            for (int i = 0; i < tamanho_ids; i++) {
-                fprintf(fp_fila, "%d", ids[i]);
-                if (i < tamanho_ids - 1) {
-                    fprintf(fp_fila, ", ");
-                }
-            }
-            free(ids);
-        }
-        
-        fprintf(fp_fila, "]");
-    }
-    
-    fprintf(fp_fila, "\n}");
-    fclose(fp_fila);
-    
+
+    fclose(arq_fila);
     return true;
 }
 
-// Função auxiliar para pular espaços em branco
-static void pular_espacos(FILE* fp) {
-    int c;
-    while ((c = fgetc(fp)) != EOF && (c == ' ' || c == '\t' || c == '\n' || c == '\r')) {
-        // Pula espaços
-    }
-    if (c != EOF) {
-        ungetc(c, fp);
-    }
-}
 
-// Função auxiliar para ler string JSON
-static bool ler_string_json(FILE* fp, char* buffer, int max_len) {
-    pular_espacos(fp);
-    int c = fgetc(fp);
-    if (c != '"') {
-        ungetc(c, fp);
-        return false;
-    }
-    
-    int i = 0;
-    bool escape = false;
-    while (i < max_len - 1) {
-        c = fgetc(fp);
-        if (c == EOF) return false;
-        
-        if (escape) {
-            switch (c) {
-                case 'n': buffer[i++] = '\n'; break;
-                case 'r': buffer[i++] = '\r'; break;
-                case 't': buffer[i++] = '\t'; break;
-                case '"': buffer[i++] = '"'; break;
-                case '\\': buffer[i++] = '\\'; break;
-                default: buffer[i++] = c; break;
-            }
-            escape = false;
-        } else if (c == '\\') {
-            escape = true;
-        } else if (c == '"') {
-            break;
-        } else {
-            buffer[i++] = c;
-        }
-    }
-    
-    buffer[i] = '\0';
-    return true;
-}
 
-// Função auxiliar para ler número inteiro
-static bool ler_numero_json(FILE* fp, int* valor) {
-    pular_espacos(fp);
-    return (fscanf(fp, "%d", valor) == 1);
-}
-
+// ============================================================================
+// CARREGAR
+// ============================================================================
 bool io_carregar(AVL** lista_pacientes, FILA** fila_espera) {
-    if (lista_pacientes == NULL || fila_espera == NULL) {
+    if (!lista_pacientes || !fila_espera)
+        return false;
+
+    FILE* arq_pac = fopen("data/pacientes.bin", "rb");
+    FILE* arq_fila = fopen("data/fila.bin", "rb");
+
+    if (!arq_pac || !arq_fila) {
+        if (arq_pac) fclose(arq_pac);
+        if (arq_fila) fclose(arq_fila);
+        return false;   // não existe arquivo
+    }
+
+    // Criar estruturas novas
+    *lista_pacientes = lista_criar();
+    *fila_espera = fila_criar();
+
+    if (!*lista_pacientes || !*fila_espera) {
+        if (*lista_pacientes) lista_apagar(lista_pacientes);
+        if (*fila_espera) fila_apagar(fila_espera);
+        fclose(arq_pac);
+        fclose(arq_fila);
         return false;
     }
-    
-    // Carregar pacientes da AVL
-    FILE* fp_pacientes = fopen("pacientes.json", "r");
-    if (fp_pacientes == NULL) {
-        // Arquivo não existe, não é erro - pode ser primeira execução
-        return true;
+
+    // ----- CARREGAR AV L -----
+    int total = 0;
+    fread(&total, sizeof(int), 1, arq_pac);
+
+    for (int i = 0; i < total; i++) {
+        PACIENTE_BIN pb;
+
+        fread(&pb, sizeof(PACIENTE_BIN), 1, arq_pac);
+
+        PACIENTE* p = paciente_criar(pb.id, pb.nome, pb.prioridade);
+        lista_inserir_paciente(*lista_pacientes, p);
     }
-    
-    pular_espacos(fp_pacientes);
-    int c = fgetc(fp_pacientes);
-    if (c != '{') {
-        fclose(fp_pacientes);
-        return false;
-    }
-    
-    // Procura por "pacientes"
-    char buffer[256];
-    while (fscanf(fp_pacientes, "%255s", buffer) == 1) {
-        if (strcmp(buffer, "\"pacientes\"") == 0) {
-            pular_espacos(fp_pacientes);
-            c = fgetc(fp_pacientes);
-            if (c != ':') {
-                fclose(fp_pacientes);
-                return false;
-            }
-            pular_espacos(fp_pacientes);
-            c = fgetc(fp_pacientes);
-            if (c != '[') {
-                fclose(fp_pacientes);
-                return false;
-            }
-            break;
+
+    fclose(arq_pac);
+
+    // ----- CARREGAR FILAS -----
+    for (int pr = 0; pr < 5; pr++) {
+        int tam = 0;
+        fread(&tam, sizeof(int), 1, arq_fila);
+
+        for (int i = 0; i < tam; i++) {
+            int id;
+            fread(&id, sizeof(int), 1, arq_fila);
+
+            PACIENTE* p = lista_buscar_paciente(*lista_pacientes, id);
+            if (p)
+                fila_inserir_paciente(*fila_espera, p);
         }
     }
-    
-    // Lê array de pacientes
-    pular_espacos(fp_pacientes);
-    c = fgetc(fp_pacientes);
-    
-    while (c != ']' && c != EOF) {
-        if (c == '{') {
-            int id = -1, prioridade = -1;
-            char nome[100] = {0};
-            
-            // Lê campos do paciente
-            while (1) {
-                pular_espacos(fp_pacientes);
-                if (fscanf(fp_pacientes, "%255s", buffer) != 1) break;
-                
-                if (strcmp(buffer, "\"id\"") == 0) {
-                    pular_espacos(fp_pacientes);
-                    fgetc(fp_pacientes); // ':'
-                    ler_numero_json(fp_pacientes, &id);
-                } else if (strcmp(buffer, "\"nome\"") == 0) {
-                    pular_espacos(fp_pacientes);
-                    fgetc(fp_pacientes); // ':'
-                    ler_string_json(fp_pacientes, nome, sizeof(nome));
-                } else if (strcmp(buffer, "\"prioridade\"") == 0) {
-                    pular_espacos(fp_pacientes);
-                    fgetc(fp_pacientes); // ':'
-                    ler_numero_json(fp_pacientes, &prioridade);
-                }
-                
-                pular_espacos(fp_pacientes);
-                c = fgetc(fp_pacientes);
-                if (c == '}') break;
-                if (c != ',') {
-                    ungetc(c, fp_pacientes);
-                    break;
-                }
-            }
-            
-            // Cria paciente e insere na AVL
-            if (id >= 0 && prioridade >= 0 && prioridade <= 4 && nome[0] != '\0') {
-                PACIENTE* paciente = paciente_criar(id, nome, prioridade);
-                if (paciente != NULL) {
-                    lista_inserir_paciente(*lista_pacientes, paciente);
-                }
-            }
-        }
-        
-        pular_espacos(fp_pacientes);
-        c = fgetc(fp_pacientes);
-        if (c == ',') {
-            pular_espacos(fp_pacientes);
-            c = fgetc(fp_pacientes);
-        }
-    }
-    
-    fclose(fp_pacientes);
-    
-    // Carregar fila de espera
-    FILE* fp_fila = fopen("fila_espera.json", "r");
-    if (fp_fila == NULL) {
-        // Arquivo não existe, não é erro - fila pode estar vazia
-        return true;
-    }
-    
-    pular_espacos(fp_fila);
-    c = fgetc(fp_fila);
-    if (c != '{') {
-        fclose(fp_fila);
-        return false;
-    }
-    
-    const char* nomes_prioridade[] = {
-        "nao_urgente",
-        "pouco_urgente",
-        "urgente",
-        "muito_urgente",
-        "emergencia"
-    };
-    
-    // Lê cada campo de prioridade
-    for (int prioridade = 0; prioridade < 5; prioridade++) {
-        // Procura pelo campo da prioridade
-        rewind(fp_fila);
-        pular_espacos(fp_fila);
-        c = fgetc(fp_fila);
-        if (c != '{') continue;
-        
-        char campo[256];
-        snprintf(campo, sizeof(campo), "\"%s\"", nomes_prioridade[prioridade]);
-        
-        // Procura pelo campo
-        while (fscanf(fp_fila, "%255s", buffer) == 1) {
-            if (strcmp(buffer, campo) == 0) {
-                pular_espacos(fp_fila);
-                c = fgetc(fp_fila);
-                if (c != ':') break;
-                pular_espacos(fp_fila);
-                c = fgetc(fp_fila);
-                if (c != '[') break;
-                
-                // Lê array de IDs
-                pular_espacos(fp_fila);
-                c = fgetc(fp_fila);
-                
-                while (c != ']' && c != EOF) {
-                    if ((c >= '0' && c <= '9') || c == '-') {
-                        ungetc(c, fp_fila);
-                        int id_fila;
-                        if (ler_numero_json(fp_fila, &id_fila)) {
-                            // Busca paciente na AVL pelo ID
-                            PACIENTE* paciente = lista_buscar_paciente(*lista_pacientes, id_fila);
-                            if (paciente != NULL) {
-                                // Insere na fila
-                                fila_inserir_paciente(*fila_espera, paciente);
-                            }
-                        }
-                    }
-                    
-                    pular_espacos(fp_fila);
-                    c = fgetc(fp_fila);
-                    if (c == ',') {
-                        pular_espacos(fp_fila);
-                        c = fgetc(fp_fila);
-                    }
-                }
-                break;
-            }
-        }
-    }
-    
-    fclose(fp_fila);
+
+    fclose(arq_fila);
     return true;
 }

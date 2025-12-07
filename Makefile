@@ -51,4 +51,4 @@ clean:
 
 # Remove tudo + os arquivos de dados JSON
 clean-all: clean
-	rm -f data/*.json
+	rm -f data/*.bin
