@@ -4,12 +4,13 @@ LDFLAGS = -fsanitize=address
 
 SRC_MAIN = main.c
 SRC_PACIENTE = src/paciente.c
+SRC_PILHA = src/pilha.c
 SRC_AVL = src/avl.c
 SRC_FILA = src/fila.c
 SRC_OP = src/op.c
 SRC_IO = src/IO.c
 
-OBJS = build/main.o build/paciente.o build/avl.o build/fila.o build/op.o build/IO.o
+OBJS = build/main.o build/paciente.o build/pilha.o build/avl.o build/fila.o build/op.o build/IO.o
 
 TARGET = programa
 
@@ -23,8 +24,11 @@ $(TARGET): $(OBJS)
 build/main.o: $(SRC_MAIN) headers/paciente.h headers/avl.h headers/fila.h headers/op.h
 	$(CC) $(CFLAGS) -c $(SRC_MAIN) -o $@
 
-build/paciente.o: $(SRC_PACIENTE) headers/paciente.h
+build/paciente.o: $(SRC_PACIENTE) headers/paciente.h headers/pilha.h
 	$(CC) $(CFLAGS) -c $(SRC_PACIENTE) -o $@
+
+build/pilha.o: $(SRC_PILHA) headers/pilha.h
+	$(CC) $(CFLAGS) -c $(SRC_PILHA) -o $@
 
 build/avl.o: $(SRC_AVL) headers/avl.h headers/paciente.h
 	$(CC) $(CFLAGS) -c $(SRC_AVL) -o $@
@@ -35,7 +39,7 @@ build/fila.o: $(SRC_FILA) headers/fila.h headers/paciente.h
 build/op.o: $(SRC_OP) headers/op.h headers/paciente.h headers/avl.h headers/fila.h
 	$(CC) $(CFLAGS) -c $(SRC_OP) -o $@
 
-build/IO.o: $(SRC_IO) headers/IO.h headers/paciente.h headers/avl.h headers/fila.h
+build/IO.o: $(SRC_IO) headers/IO.h headers/paciente.h headers/avl.h headers/fila.h headers/pilha.h
 	$(CC) $(CFLAGS) -c $(SRC_IO) -o $@
 
 # Criar pasta build
@@ -51,4 +55,4 @@ clean:
 
 # Remove tudo + os arquivos de dados JSON
 clean-all: clean
-	rm -f data/*.json
+	rm -f data/*.bin

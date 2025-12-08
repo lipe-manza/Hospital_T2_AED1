@@ -13,5 +13,5 @@ data/*.json
 *.tmp
 
 # Arquivos de persistência de dados
-fila_espera.json
-pacientes.json
+pacientes.bin
+fila.bin

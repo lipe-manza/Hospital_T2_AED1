@@ -122,8 +122,12 @@ void call_options(AVL* lista_de_pacientes, FILA* fila_de_espera, int choice) {
 
         PACIENTE* paciente_encontrado = lista_buscar_paciente(lista_de_pacientes, id_buscar);
         if (paciente_encontrado != NULL) {
-            printf("Paciente encontrado:\n");
+            printf("\nPaciente encontrado:\n");
             paciente_imprimir(paciente_encontrado);
+            printf("\nHistórico de medicamentos/procedimentos:\n");
+            if (!paciente_imprimir_historico(paciente_encontrado)) {
+                printf("(Histórico vazio)\n");
+            }
         }
         else {
             printf("Paciente com ID %d não encontrado na lista.\n", id_buscar);
@@ -148,11 +152,35 @@ void call_options(AVL* lista_de_pacientes, FILA* fila_de_espera, int choice) {
         }
         break;
     }
-    case 7: // Sair
+    case 7: { // Adicionar medicamento/procedimento
+        int id_paciente;
+        char medicamento[101];
+        
+        printf("Insira o ID do paciente: ");
+        scanf("%d", &id_paciente);
+        
+        PACIENTE* paciente = lista_buscar_paciente(lista_de_pacientes, id_paciente);
+        if (paciente == NULL) {
+            printf("ERRO: Paciente com ID %d não encontrado no sistema.\n", id_paciente);
+            break;
+        }
+        
+        printf("Insira o medicamento/procedimento a ser adicionado: ");
+        scanf(" %[^\n]", medicamento);
+        
+        if (paciente_add_medicamento(paciente, medicamento)) {
+            printf("Medicamento/procedimento '%s' adicionado com sucesso ao histórico do paciente %s (ID %d).\n",
+                   medicamento, paciente_get_name(paciente), id_paciente);
+        } else {
+            printf("ERRO: Não foi possível adicionar o medicamento/procedimento. O histórico pode estar cheio.\n");
+        }
+        break;
+    }
+    case 8: // Sair
         printf("Encerrando o sistema...\n");
         break;
     default:
-        printf("Opção inválida! Por favor, escolha uma opção entre 0 e 8.\n");
+        printf("Opção inválida! Por favor, escolha uma opção entre 1 e 8.\n");
         break;
     }
 }
