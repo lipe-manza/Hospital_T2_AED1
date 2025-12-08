@@ -110,73 +110,109 @@ void call_options(AVL* lista_de_pacientes, FILA* fila_de_espera, int choice) {
     }
     case 3: // Listar pacientes
     {
+        // Imprimir a lista de pacientes
         printf("Lista de Pacientes Registrados:\n\n");
         lista_imprimir(lista_de_pacientes);
-      
+
         break;
     }
-    case 4: { // Buscar paciente por ID
+    case 4: // Buscar paciente por ID
+    {
+        // Solicitar ID do paciente a ser buscado
         int id_buscar;
         printf("Insira o ID do paciente que deseja buscar: ");
         scanf("%d", &id_buscar);
 
+        // Buscar paciente na lista
         PACIENTE* paciente_encontrado = lista_buscar_paciente(lista_de_pacientes, id_buscar);
-        if (paciente_encontrado != NULL) {
+        if (paciente_encontrado != NULL) { // Se o paciente for encontrado, imprimir seus dados
             printf("\nPaciente encontrado:\n");
             paciente_imprimir(paciente_encontrado);
             printf("\nHistórico de medicamentos/procedimentos:\n");
+            // Imprime o histórico do paciente, se estiver vazio printa mensagem
             if (!paciente_imprimir_historico(paciente_encontrado)) {
                 printf("(Histórico vazio)\n");
             }
         }
         else {
+            // Se o paciente não for encontrado, imprimir mensagem de erro
             printf("Paciente com ID %d não encontrado na lista.\n", id_buscar);
         }
         break;
 
     }
-    case 5: { // Mostrar fila de espera
+    case 5: // Mostrar fila de espera
+    {
+        // Imprimir a fila de espera
         fila_imprimir(fila_de_espera);
         break;
     }
-    case 6:// Dar alta ao paciente 
+    case 6: // Dar alta ao paciente 
     {
         PACIENTE* paciente_atendimento = fila_remover_paciente(fila_de_espera); // Retira o primeiro da fila da triagem
         if (paciente_atendimento != NULL) { // Verifica se o paciente existe e printa que foi chamado
-            printf("Foi dada alta ao paciente %s (ID %d) .\n",
-                paciente_get_name(paciente_atendimento),
-                paciente_get_id(paciente_atendimento));
+            printf("Foi dada alta ao paciente %s (ID %d) .\n", paciente_get_name(paciente_atendimento), paciente_get_id(paciente_atendimento));
         }
         else {
             printf("ERRO: Nenhum paciente na fila de espera.\n");
         }
         break;
     }
-    case 7: { // Adicionar medicamento/procedimento
+    case 7:  // Adicionar medicamento/procedimento
+    {
         int id_paciente;
         char medicamento[101];
-        
+
+        // Solicitar ID do paciente
         printf("Insira o ID do paciente: ");
         scanf("%d", &id_paciente);
-        
+
+        // Buscar paciente na lista
+        PACIENTE* paciente = lista_buscar_paciente(lista_de_pacientes, id_paciente);
+        if (paciente == NULL) {// Se o paciente não for encontrado, imprimir mensagem de erro
+            printf("ERRO: Paciente com ID %d não encontrado no sistema.\n", id_paciente);
+            break;
+        }
+
+        // Solicitar medicamento/procedimento a ser adicionado
+        printf("Insira o medicamento/procedimento a ser adicionado: ");
+        scanf(" %[^\n]", medicamento);
+
+        // Adicionar medicamento/procedimento ao histórico do paciente
+        if (paciente_add_medicamento(paciente, medicamento)) {
+            printf("Medicamento/procedimento '%s' adicionado com sucesso ao histórico do paciente %s (ID %d).\n",
+                medicamento, paciente_get_name(paciente), id_paciente);
+        }
+        else {
+            printf("ERRO: Não foi possível adicionar o medicamento/procedimento. O histórico pode estar cheio.\n"); 
+        }
+        break;
+    }
+    case 8: // Remover historico medico 
+    {
+        // Solicitar ID do paciente
+        int id_paciente;
+        printf("Insira o ID do paciente: ");
+        scanf("%d", &id_paciente);
+
+        // Buscar paciente na lista
         PACIENTE* paciente = lista_buscar_paciente(lista_de_pacientes, id_paciente);
         if (paciente == NULL) {
             printf("ERRO: Paciente com ID %d não encontrado no sistema.\n", id_paciente);
             break;
         }
-        
-        printf("Insira o medicamento/procedimento a ser adicionado: ");
-        scanf(" %[^\n]", medicamento);
-        
-        if (paciente_add_medicamento(paciente, medicamento)) {
-            printf("Medicamento/procedimento '%s' adicionado com sucesso ao histórico do paciente %s (ID %d).\n",
-                   medicamento, paciente_get_name(paciente), id_paciente);
-        } else {
-            printf("ERRO: Não foi possível adicionar o medicamento/procedimento. O histórico pode estar cheio.\n");
+        //  Remover o último medicamento/procedimento do histórico do paciente
+        char* medicamento_removido = paciente_retirar_ultimo_medicamento(paciente);
+        if (medicamento_removido != NULL) {
+            printf("Medicamento/procedimento '%s' removido do histórico do paciente %s (ID %d).\n",
+                medicamento_removido, paciente_get_name(paciente), id_paciente);
+        }
+        else {
+            printf("ERRO: Não foi possível remover o medicamento/procedimento. O histórico pode estar vazio.\n");
         }
         break;
     }
-    case 8: // Sair
+    case 9: // Sair
         printf("Encerrando o sistema...\n");
         break;
     default:

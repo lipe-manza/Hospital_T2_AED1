@@ -16,15 +16,13 @@ typedef struct {
 } PACIENTE_BIN;
 
 
-// ============================================================================
-// SALVAR
-// ============================================================================
+// Salva lista de pacientes (AVL) e fila de espera (FILA) em arquivos binários
 bool io_salvar(AVL* lista_pacientes, FILA* fila_espera) {
     if (!lista_pacientes || !fila_espera)
         return false;
 
-    FILE* arq_pac = fopen("pacientes.bin", "wb");
-    FILE* arq_fila = fopen("fila.bin", "wb");
+    FILE* arq_pac = fopen("data/pacientes.bin", "wb");
+    FILE* arq_fila = fopen("data/fila.bin", "wb");
 
     if (!arq_pac || !arq_fila) {
         if (arq_pac) fclose(arq_pac);
@@ -95,16 +93,14 @@ bool io_salvar(AVL* lista_pacientes, FILA* fila_espera) {
 }
 
 
-
-// ============================================================================
-// CARREGAR
-// ============================================================================
+// Carrega lista de pacientes (AVL) e fila de espera (FILA) de arquivos binários
 bool io_carregar(AVL* lista_pacientes, FILA* fila_espera) {
     if (!lista_pacientes || !fila_espera)
         return false;
 
-    FILE* arq_pac = fopen("pacientes.bin", "rb");
-    FILE* arq_fila = fopen("fila.bin", "rb");
+    // Abre arquivos para leitura
+    FILE* arq_pac = fopen("data/pacientes.bin", "rb");
+    FILE* arq_fila = fopen("data/fila.bin", "rb");
 
     if (!arq_pac || !arq_fila) {
         if (arq_pac) fclose(arq_pac);
@@ -132,9 +128,13 @@ bool io_carregar(AVL* lista_pacientes, FILA* fila_espera) {
             if (historico_completo != NULL) {
                 // Lê cada item do histórico
                 for (int j = 0; j < pb.tamanho_historico; j++) {
+                    // Cada item tem tamanho fixo de 101
                     char item[101];
+                    // Lê do arquivo
                     fread(item, sizeof(char), 101, arq_pac);
+                    // Aloca e copia para o array
                     historico_completo[j] = (char*)malloc(101 * sizeof(char));
+                    // Copia o conteúdo lido
                     if (historico_completo[j] != NULL) {
                         strncpy(historico_completo[j], item, 100);
                         historico_completo[j][100] = '\0';
@@ -155,12 +155,15 @@ bool io_carregar(AVL* lista_pacientes, FILA* fila_espera) {
             }
         }
 
+        // Insere paciente na AVL
         lista_inserir_paciente(lista_pacientes, p);
     }
 
+    // Fecha arquivo de pacientes
     fclose(arq_pac);
 
     // ----- CARREGAR FILAS -----
+    // Para cada prioridade, lê os IDs e insere na fila
     for (int pr = 0; pr < 5; pr++) {
         int tam = 0;
         fread(&tam, sizeof(int), 1, arq_fila);
@@ -169,12 +172,15 @@ bool io_carregar(AVL* lista_pacientes, FILA* fila_espera) {
             int id;
             fread(&id, sizeof(int), 1, arq_fila);
 
+            // Busca paciente na AVL
             PACIENTE* p = lista_buscar_paciente(lista_pacientes, id);
             if (p)
+                // Insere paciente na fila
                 fila_inserir_paciente(fila_espera, p);
         }
     }
 
+    // Fecha arquivo de fila
     fclose(arq_fila);
     return true;
 }

@@ -15,7 +15,7 @@ OBJS = build/main.o build/paciente.o build/pilha.o build/avl.o build/fila.o buil
 TARGET = programa
 
 # ====== Build padrão ======
-all: build $(TARGET)
+all: build data $(TARGET)
 
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
@@ -46,13 +46,16 @@ build/IO.o: $(SRC_IO) headers/IO.h headers/paciente.h headers/avl.h headers/fila
 build:
 	mkdir -p build
 
+# Criar pasta data
+data:
+	mkdir -p data
+
 run: all
 	./$(TARGET)
+
 # ====== Limpeza ======
-# Remove somente os .o e o binário
 clean:
 	rm -rf build $(TARGET)
 
-# Remove tudo + os arquivos de dados JSON
 clean-all: clean
-	rm -f data/*.bin
+	rm -rf data

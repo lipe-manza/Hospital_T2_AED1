@@ -10,7 +10,7 @@ struct pilha {
     int topo; // Topo da pilha
 };
 
-// Função que cria a pilha
+// Função que cria a pilha (publica)
 PILHA* pilha_criar(void) {
     PILHA* p = (PILHA*)malloc(sizeof(PILHA));
     if (p != NULL) {
@@ -24,6 +24,7 @@ PILHA* pilha_criar(void) {
     return NULL;
 }
 
+// Função que apaga a pilha (publica)
 void pilha_apagar(PILHA** p) {
     if (p == NULL || *p == NULL) {
         return;
@@ -34,6 +35,7 @@ void pilha_apagar(PILHA** p) {
     *p = NULL;
 }
 
+// Verifica se a pilha está vazia (publica)
 bool pilha_vazia(PILHA* p) {
     if (p == NULL)
         return true;
@@ -41,18 +43,21 @@ bool pilha_vazia(PILHA* p) {
     return (p->topo == -1);
 }
 
+// Verifica se a pilha está cheia (publica)
 bool pilha_cheia(PILHA* p) {
     if (p == NULL) return true;
 
     return (p->topo == TAM_PILHA - 1);
 }
 
+// Retorna o tamanho da pilha (publica)
 int pilha_tamanho(PILHA* p) {
     if (p == NULL) return -1;
 
     return (p->topo) + 1;
 }
 
+// Retorna o índice do topo da pilha (publica)
 int pilha_topo(PILHA* p) {
     if (p == NULL) return 0;
 
@@ -61,7 +66,7 @@ int pilha_topo(PILHA* p) {
     return p->topo;
 }
 
-// Empilha o procedimento medico na pilha
+// Empilha o procedimento medico na pilha (publica)
 bool pilha_empilhar(PILHA* p, char* medicamento) {
     if (p == NULL || medicamento == NULL) return false;
 
@@ -73,12 +78,13 @@ bool pilha_empilhar(PILHA* p, char* medicamento) {
     return true;
 }
 
-// Desempilha o procedimento medico na pilha e retorna o procedimento
+// Desempilha o procedimento medico na pilha e retorna o procedimento (publica)
 char* pilha_desempilhar(PILHA* p) {
     if (p == NULL) return NULL;
 
     if (pilha_vazia(p)) return NULL;
 
+    // Cria uma string estática para retornar o valor desempilhado
     static char historico[101];
     strncpy(historico, p->historico[p->topo], 100);
     historico[100] = '\0';
@@ -87,7 +93,7 @@ char* pilha_desempilhar(PILHA* p) {
     return historico;
 }
 
-// Imprime a pilha
+// Imprime a pilha (publica)
 void pilha_imprimir(PILHA* p) {
     if (p == NULL || pilha_vazia(p)) {
         printf("Histórico vazio.\n");
@@ -100,19 +106,21 @@ void pilha_imprimir(PILHA* p) {
 }
 
 // Função auxiliar para obter o histórico completo (para uso em IO)
-// Retorna array de strings e o tamanho
+// Retorna array de strings e o tamanho (publica)
 char** pilha_obter_historico_completo(PILHA* p, int* tamanho) {
     if (p == NULL || tamanho == NULL) {
         if (tamanho) *tamanho = 0;
         return NULL;
     }
 
+    // Determina o tamanho da pilha
     int tam = pilha_tamanho(p);
     if (tam <= 0) {
         *tamanho = 0;
         return NULL;
     }
 
+    // Aloca o array de strings
     char** historico = (char**)malloc(tam * sizeof(char*));
     if (historico == NULL) {
         *tamanho = 0;
@@ -135,11 +143,12 @@ char** pilha_obter_historico_completo(PILHA* p, int* tamanho) {
         historico[i][100] = '\0';
     }
 
+    // Define o tamanho retornado
     *tamanho = tam;
     return historico;
 }
 
-// Função auxiliar para limpar o histórico alocado por pilha_obter_historico_completo
+// Função auxiliar para limpar o histórico alocado por pilha_obter_historico_completo (publica)
 void pilha_liberar_historico_completo(char** historico, int tamanho) {
     if (historico == NULL) return;
 
@@ -149,7 +158,7 @@ void pilha_liberar_historico_completo(char** historico, int tamanho) {
     free(historico);
 }
 
-// Função para restaurar histórico a partir de um array
+// Função para restaurar histórico a partir de um array (publica)
 bool pilha_restaurar_historico(PILHA* p, char** historico, int tamanho) {
     if (p == NULL || historico == NULL || tamanho < 0) return false;
 

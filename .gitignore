@@ -1,17 +1,17 @@
 # Pasta de compilação e arquivos objetos
 build/
 
+# Pasta de dados persistidos
+data/
+
 # Executável
 programa
-
-# Ignorar apenas arquivos .json dentro da pasta data
-data/*.json
 
 # Arquivos temporários de editor (opcional)
 *.swp
 *.swo
 *.tmp
 
-# Arquivos de persistência de dados
+# Arquivos de persistência de dados (caso apareçam fora da pasta data)
 pacientes.bin
 fila.bin

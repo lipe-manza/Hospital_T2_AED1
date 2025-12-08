@@ -6,14 +6,14 @@
 // Estrutura do nó (usa o TAD PACIENTE)
 struct no {
     PACIENTE* paciente;
-    int height; // para calcular balance factor
+    int height; // para calcular fator de balanceamento
     NO* left;
     NO* right;
 };
 
 // Estrutura da AVL
 struct avl {
-    NO* root;
+    NO* root; // nó raiz
 };
 
 // Cria uma árvore vazia
@@ -37,7 +37,9 @@ static NO* avl_criar_no(PACIENTE* paciente) {
     return new_node;
 }
 
+// Verifica se a árvore está cheia (privada)
 static bool lista_cheia() {
+    // tenta alocar memória para um nó para verificar se há memória disponível
     NO* teste = malloc(sizeof(NO));
     if (teste == NULL)
         return true;
@@ -46,9 +48,10 @@ static bool lista_cheia() {
 }
 
 
-// Apaga recursivamente a árvore (libera pacientes também)
+// Apaga recursivamente a árvore (libera pacientes também) (privada)
 static void avl_apagar_aux(NO* root) {
     if (root != NULL) {
+        // apaga subárvores em pós-ordem
         avl_apagar_aux(root->left);
         avl_apagar_aux(root->right);
         paciente_apagar(&root->paciente); // libera PACIENTE via TAD
@@ -56,7 +59,7 @@ static void avl_apagar_aux(NO* root) {
     }
 }
 
-// API pública: apaga a árvore e seta ponteiro NULL
+// Aapaga a árvore e seta ponteiro NULL (pública)
 void lista_apagar(AVL** T) {
     if (T && *T) {
         avl_apagar_aux((*T)->root);
@@ -65,10 +68,10 @@ void lista_apagar(AVL** T) {
     }
 }
 
-// Busca recursiva (privada)
+// Busca recursiva por id (privada) 
 static PACIENTE* avl_busca_aux(NO* root, int id) {
     if (root == NULL) return NULL;
-    if (id == paciente_get_id(root->paciente))
+    if (id == paciente_get_id(root->paciente)) // se encontrou retorna paciente
         return root->paciente;
     if (id < paciente_get_id(root->paciente))
         return avl_busca_aux(root->left, id);
@@ -76,13 +79,13 @@ static PACIENTE* avl_busca_aux(NO* root, int id) {
         return avl_busca_aux(root->right, id);
 }
 
-// API pública de busca (usa nó raiz)
+// Busca paciennte por id e retorna ponteiro do paciente (ou NULL se não encontrado) (pública)
 PACIENTE* lista_buscar_paciente(AVL* T, int id) {
     if (T == NULL) return NULL;
     return avl_busca_aux(T->root, id);
 }
 
-// Retorna altura do nó (-1 se NULL)
+// Retorna altura do nó (-1 se NULL) (privada)
 static int avl_altura_no(NO* root) {
     return (root == NULL) ? -1 : root->height;
 }
@@ -118,7 +121,7 @@ static NO* rotacao_direita_esquerda(NO* A) {
     return rotacao_esquerda(A);
 }
 
-// Inserção recursiva (recebe nó pré-criado)
+// Inserção recursiva (recebe nó pré-criado) (privada)
 static NO* avl_inserir_no_aux(NO* root, NO* new_node) {
     if (root == NULL) {
         root = new_node; // insere aqui
@@ -155,7 +158,7 @@ static NO* avl_inserir_no_aux(NO* root, NO* new_node) {
     return root;
 }
 
-// API pública: insere paciente
+// Insere paciente (pública)
 bool lista_inserir_paciente(AVL* T, PACIENTE* paciente) {
     if (T == NULL || paciente == NULL) return false;
 
@@ -164,23 +167,27 @@ bool lista_inserir_paciente(AVL* T, PACIENTE* paciente) {
         return false;
     }
 
+    // verifica memória 
     if (lista_cheia()) {
         printf("Erro: memória insuficiente para inserir novo paciente na árvore.\n");
         return false;
     }
+    // cria nó
     NO* new_node = avl_criar_no(paciente);
     if (new_node == NULL) return false;
 
+    // insere recursivamente
     T->root = avl_inserir_no_aux(T->root, new_node);
     if (T->root != NULL)
         return true;
 
+    
     printf("Erro ao inserir paciente na árvore.\n");
     return false;
 }
 
 
-// Helper para remover: procura maior na subárvore esquerda e o coloca no nó r
+// Procura maior na subárvore esquerda e o coloca no nó r (removendo-o da subárvore) (privada)
 static void swap_left_max(NO* t, NO* r, NO* a) {
     if (t->right != NULL) {
         swap_left_max(t->right, r, t);
@@ -264,15 +271,20 @@ bool lista_remover_paciente(AVL* T, int id) {
     return true;
 }
 
-// Impressão em ordem (in-order traversal)
+// Impressão em ordem (in-order traversal) (privada)
 static void lista_imprimir_aux(NO* root) {
     if (root != NULL) {
         lista_imprimir_aux(root->left);
         paciente_imprimir(root->paciente);
+
+        printf("Historico medico de %s:\n", paciente_get_name(root->paciente));
+        paciente_imprimir_historico(root->paciente);
+        printf("\n");
         lista_imprimir_aux(root->right);
     }
 }
 
+// Imprime a árvore (in-order)(pública) 
 void lista_imprimir(AVL* T) {
     if (T == NULL) {
         printf("Lista nao existe.\n");
@@ -285,7 +297,7 @@ void lista_imprimir(AVL* T) {
     lista_imprimir_aux(T->root);
 }
 
-// Função auxiliar para contar nós na AVL
+// Função auxiliar para contar nós na AVL(privada)
 static int contar_nos_aux(NO* root) {
     if (root == NULL) return 0;
     return 1 + contar_nos_aux(root->left) + contar_nos_aux(root->right);
@@ -294,7 +306,7 @@ static int contar_nos_aux(NO* root) {
 // Função auxiliar para coletar pacientes em array (in-order)
 static int coletar_pacientes_aux(NO* root, PACIENTE** array, int index) {
     if (root == NULL) return index;
-    
+
     index = coletar_pacientes_aux(root->left, array, index);
     if (root->paciente != NULL) {
         array[index++] = root->paciente;
@@ -303,27 +315,32 @@ static int coletar_pacientes_aux(NO* root, PACIENTE** array, int index) {
     return index;
 }
 
-// obtém todos os pacientes da AVL em um array
+// Obtém todos os pacientes da AVL em um array e retorna o array (pública)
 PACIENTE** lista_obter_todos_pacientes(AVL* T, int* tamanho) {
+    // validação
     if (T == NULL || tamanho == NULL) {
         if (tamanho != NULL) *tamanho = 0;
         return NULL;
     }
-    
+
+    // conta nós
     int count = contar_nos_aux(T->root);
     if (count == 0) {
         *tamanho = 0;
         return NULL;
     }
-    
+
+    // aloca array com tamanho (count)
     PACIENTE** array = (PACIENTE**)malloc(count * sizeof(PACIENTE*));
     if (array == NULL) {
         *tamanho = 0;
         return NULL;
     }
-    
+
+    // Coleta pacientes em ordem
     coletar_pacientes_aux(T->root, array, 0);
     *tamanho = count;
     return array;
+    
 }
 

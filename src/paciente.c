@@ -12,7 +12,7 @@ struct paciente {
     PILHA* historico; // Ponteiro para a pilha que armazena o histórico do paciente
 };
 
-// Função que cria o paciente com seu id e nome
+// Função que cria o paciente com seu id e nome (publica)
 PACIENTE* paciente_criar(int id, const char* nome, int prioridade) {
     PACIENTE* p = (PACIENTE*)malloc(sizeof(PACIENTE));
     if (p != NULL) {
@@ -29,7 +29,7 @@ PACIENTE* paciente_criar(int id, const char* nome, int prioridade) {
     return p;
 }
 
-
+// Função que apaga o paciente (publica)
 bool paciente_apagar(PACIENTE** paciente) {
     if (paciente != NULL && *paciente != NULL) {
         if ((*paciente)->historico != NULL) {
@@ -42,7 +42,7 @@ bool paciente_apagar(PACIENTE** paciente) {
     return false;
 }
 
-// Função para retornar o id do paciente
+// Função para retornar o id do paciente (publica)
 int paciente_get_id(PACIENTE* p) {
     if (p != NULL) {
         return p->id;
@@ -50,6 +50,7 @@ int paciente_get_id(PACIENTE* p) {
     return -1; // Indica erro
 }
 
+// Função para retornar a prioridade do paciente (publica)
 int paciente_get_prioridade(PACIENTE* p) {
     if (p != NULL) {
         return p->prioridade;
@@ -57,7 +58,7 @@ int paciente_get_prioridade(PACIENTE* p) {
     return -1; // Indica erro
 }
 
-// Função para retornar o nome do paciente
+// Função para retornar o nome do paciente (publica)
 const char* paciente_get_name(PACIENTE* p) {
     if (p != NULL) {
         return p->nome;
@@ -65,14 +66,14 @@ const char* paciente_get_name(PACIENTE* p) {
     return NULL; // Indica erro
 }
 
-// Função para imprimir apenas o ID e nome do paciente 
+// Função para imprimir apenas o ID e nome do paciente (publica)
 void paciente_imprimir(PACIENTE* p) {
     if (p != NULL) {
         printf("%d - %s\n", p->id, p->nome);
     }
 }
 
-// Função para adicionar um medicamento/procedimento no historico do paciente(pilha)
+// Função para adicionar um medicamento/procedimento no historico do paciente(pilha) (publica)
 bool paciente_add_medicamento(PACIENTE* p, char* medicamento) {
     if (p != NULL && medicamento != NULL && p->historico != NULL) {
         return pilha_empilhar(p->historico, medicamento);
@@ -80,7 +81,7 @@ bool paciente_add_medicamento(PACIENTE* p, char* medicamento) {
     return false;
 }
 
-// Função para remover um medicamento/procedimento no historico do paciente(pilha) e não retorna nada
+// Função para remover um medicamento/procedimento no historico do paciente(pilha)(publica)
 bool paciente_remover_medicamento(PACIENTE* p) {
     if (p != NULL && p->historico != NULL) {
         char* medicamento = pilha_desempilhar(p->historico);
@@ -89,7 +90,7 @@ bool paciente_remover_medicamento(PACIENTE* p) {
     return false;
 }
 
-// Função para remover um medicamento/procedimento no historico do paciente(pilha) e retorna o procedimento
+// Função para remover um medicamento/procedimento no historico do paciente(pilha) e retorna o procedimento (publica)
 char* paciente_retirar_ultimo_medicamento(PACIENTE* p) {
     if (p != NULL && p->historico != NULL) {
         return pilha_desempilhar(p->historico);
@@ -97,7 +98,7 @@ char* paciente_retirar_ultimo_medicamento(PACIENTE* p) {
     return NULL;
 }
 
-// Imprime o histórico médico do paciente 
+// Imprime o histórico médico do paciente (publica)
 bool paciente_imprimir_historico(PACIENTE* p) {
     if (p != NULL && p->historico != NULL) {
         pilha_imprimir(p->historico);
@@ -106,7 +107,7 @@ bool paciente_imprimir_historico(PACIENTE* p) {
     return false;
 }
 
-// Função que retorna o historico do paciente
+// Função que retorna o historico do paciente (ponteiro para pilha) (publica)
 PILHA* paciente_get_historico(PACIENTE* p) {
     if (p != NULL) {
         return p->historico;

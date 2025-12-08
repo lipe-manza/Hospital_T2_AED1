@@ -17,7 +17,8 @@ int display_menu() {
     printf("5. Mostrar fila de espera\n");
     printf("6. Dar alta ao paciente\n");
     printf("7. Adicionar medicamento/procedimento\n");
-    printf("8. Sair\n");
+    printf("8. Remover medicamento/procedimento\n");
+    printf("9. Sair\n");
     printf("Escolha uma opção: ");
     if (scanf("%d", &choice) != 1) { // verifica se a entrada é válida
         int c;
@@ -35,12 +36,12 @@ int main() {
     // Criar estruturas
     FILA* fila_de_espera = fila_criar();
     AVL* lista_de_pacientes = lista_criar();
-    
+
     if (!lista_de_pacientes || !fila_de_espera) {
         printf("ERRO: Não foi possível iniciar.\n");
         return 1;
     }
-    
+
     // Carregar dados salvos
     printf("===========================================\n");
     printf("   Sistema de Gestão Hospitalar - PS\n");
@@ -59,7 +60,7 @@ int main() {
         choice = display_menu();
         call_options(lista_de_pacientes, fila_de_espera, choice);
 
-    } while (choice != 8);
+    } while (choice != 9);
 
     // Salvar dados antes de sair
     printf("\nSalvando dados...\n");
